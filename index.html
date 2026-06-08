@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>SAT Vocab Battle Royale</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Animated atmosphere layers -->
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-glow" aria-hidden="true"></div>
+  <!-- Screen-edge flash for correct / wrong feedback -->
+  <div class="edge-flash" id="edgeFlash" aria-hidden="true"></div>
+  <!-- Confetti / particle host for end screens -->
+  <div class="particle-host" id="particleHost" aria-hidden="true"></div>
+  <!-- Floating score popups fly out of here -->
+  <div class="fx-layer" id="fxLayer" aria-hidden="true"></div>
+
+  <!-- ===================== START SCREEN ===================== -->
+  <section class="screen start-screen" id="startScreen">
+    <div class="start-card">
+      <div class="logo-wrap">
+        <div class="big-logo">⚔️</div>
+        <h1 class="game-title">SAT&nbsp;VOCAB</h1>
+        <h2 class="game-subtitle">BATTLE&nbsp;ROYALE</h2>
+        <div class="title-underline"></div>
+      </div>
+      <p class="start-tag">100 players drop in. One vocabulary champion walks out.</p>
+
+      <div class="field">
+        <label for="usernameInput">CALL SIGN</label>
+        <input id="usernameInput" type="text" maxlength="14" placeholder="Enter your username" autocomplete="off" />
+      </div>
+
+      <div class="field">
+        <label>DIFFICULTY</label>
+        <div class="difficulty-pick" id="difficultyPick">
+          <button type="button" class="diff-btn" data-diff="easy">😌 Easy</button>
+          <button type="button" class="diff-btn active" data-diff="normal">⚖️ Normal</button>
+          <button type="button" class="diff-btn" data-diff="hard">💀 Hard</button>
+        </div>
+      </div>
+
+      <div class="rules">
+        <div class="rule"><span class="dot green"></span> Correct answer → score, streak &amp; survival</div>
+        <div class="rule"><span class="dot red"></span> Wrong answer → lose HP &amp; risk elimination</div>
+        <div class="rule"><span class="dot blue"></span> Answer fast for bonus points — storm damage rises every round</div>
+      </div>
+
+      <button class="btn-primary" id="startBtn"><span>ENTER THE ARENA</span></button>
+      <p class="hint">15s per question · faster = more points · last player standing wins</p>
+    </div>
+  </section>
+
+  <!-- ===================== GAME SCREEN ===================== -->
+  <main class="game-wrap" id="gameScreen" hidden>
+    <!-- LEFT / MAIN COLUMN -->
+    <div class="main-col">
+      <!-- Top status HUD -->
+      <header class="hud">
+        <div class="hud-left">
+          <div class="player-badge">
+            <span class="avatar" id="hudAvatar">P</span>
+            <div class="player-meta">
+              <span class="player-name" id="hudName">Player</span>
+              <span class="player-rank">Alive · <span id="hudAlive">100</span> remaining · Round <span id="hudRound">1</span></span>
+            </div>
+          </div>
+          <div class="hp-wrap" id="hpWrap">
+            <div class="hp-label">HP</div>
+            <div class="hp-bar">
+              <div class="hp-fill" id="hpFill"></div>
+              <span class="hp-text" id="hpText">100</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hud-right">
+          <div class="stat-box">
+            <div class="stat-label">SCORE</div>
+            <div class="stat-value" id="scoreVal">0</div>
+          </div>
+          <div class="stat-box streak-box" id="streakBox">
+            <div class="stat-label">STREAK</div>
+            <div class="stat-value streak-value"><span id="streakVal">0</span><span class="fire" id="streakFire">🔥</span></div>
+          </div>
+          <button class="home-btn" id="homeBtn" type="button" title="Leave match and return home" aria-label="Leave match">
+            <span class="home-ico">🏠</span><span class="home-txt">HOME</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Question card -->
+      <section class="question-card" id="questionCard">
+        <div class="accent-line"></div>
+
+        <div class="q-head">
+          <div class="q-type-badge" id="qType">DEFINITION</div>
+          <!-- Circular SVG countdown timer -->
+          <div class="timer" id="timer">
+            <svg class="timer-svg" viewBox="0 0 120 120">
+              <circle class="ring-bg" cx="60" cy="60" r="54"></circle>
+              <circle class="ring-fg" id="ringFg" cx="60" cy="60" r="54"></circle>
+            </svg>
+            <div class="timer-num" id="timerNum">15</div>
+          </div>
+        </div>
+
+        <div class="q-context" id="qContext" hidden></div>
+        <div class="q-prompt" id="qPrompt">Loading…</div>
+
+        <div class="answers" id="answers"><!-- answer buttons injected by JS --></div>
+      </section>
+    </div>
+
+    <!-- RIGHT / LIVE LEADERBOARD -->
+    <aside class="leaderboard" id="leaderboard">
+      <div class="lb-header">
+        <h3>🏆 LEADERBOARD</h3>
+        <span class="lb-alive"><span id="lbAlive">100</span> alive</span>
+      </div>
+      <div class="lb-cols"><span>#</span><span>PLAYER</span><span>SCORE</span><span>🔥</span><span>STATUS</span></div>
+      <div class="lb-list" id="lbList"><!-- rows injected by JS --></div>
+    </aside>
+  </main>
+
+  <!-- ===================== ROUND / COUNTDOWN OVERLAY ===================== -->
+  <div class="overlay round-overlay" id="roundOverlay" hidden>
+    <div class="round-inner">
+      <div class="round-label">ROUND <span id="ovRound">1</span></div>
+      <div class="round-stats">
+        <div class="round-elim"><span id="ovElim">0</span> players eliminated</div>
+        <div class="round-remain"><span id="ovRemain">100</span> remaining</div>
+      </div>
+      <div class="round-countdown" id="ovCountdown"></div>
+    </div>
+  </div>
+
+  <!-- ===================== VICTORY SCREEN ===================== -->
+  <div class="overlay end-overlay victory-screen" id="victoryScreen" hidden>
+    <div class="end-inner">
+      <div class="big-logo crown">👑</div>
+      <h1 class="victory-title">VICTORY ROYALE</h1>
+      <p class="end-sub">You are the last scholar standing.</p>
+      <div class="end-stats">
+        <div class="end-stat"><span class="es-label">FINAL SCORE</span><span class="es-val" id="vicScore">0</span></div>
+        <div class="end-stat"><span class="es-label">ROUNDS SURVIVED</span><span class="es-val" id="vicRounds">0</span></div>
+        <div class="end-stat"><span class="es-label">BEST STREAK</span><span class="es-val" id="vicStreak">0</span></div>
+      </div>
+      <button class="btn-primary" id="playAgainBtn"><span>PLAY AGAIN</span></button>
+    </div>
+  </div>
+
+  <!-- ===================== DEFEAT SCREEN ===================== -->
+  <div class="overlay end-overlay defeat-screen" id="defeatScreen" hidden>
+    <div class="end-inner">
+      <div class="big-logo skull">💀</div>
+      <h1 class="defeat-title">ELIMINATED</h1>
+      <p class="end-sub" id="defeatText">You ran out of health.</p>
+      <div class="end-stats">
+        <div class="end-stat"><span class="es-label">FINAL SCORE</span><span class="es-val" id="defScore">0</span></div>
+        <div class="end-stat"><span class="es-label">RANK ACHIEVED</span><span class="es-val" id="defRank">#0</span></div>
+        <div class="end-stat"><span class="es-label">BEST STREAK</span><span class="es-val" id="defStreak">0</span></div>
+      </div>
+      <button class="btn-primary danger" id="tryAgainBtn"><span>TRY AGAIN</span></button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
